@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -17,7 +16,6 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-@DynamicUpdate
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +32,11 @@ public class User {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    public User(@NotNull String uuid, @NotNull String deviceId) {
+        this.userUuid = uuid;
+        this.userDeviceId = deviceId;
+    }
 
     @Override
     public boolean equals(Object obj) {
