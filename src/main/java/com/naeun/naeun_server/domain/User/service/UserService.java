@@ -40,4 +40,19 @@ public class UserService {
 
         return new LoginResDto(user.getUserId(), jwtVo.getAccessToken(), jwtVo.getRefreshToken());
     }
+
+    // Refresh tokens
+    @Transactional
+    public LoginResDto refreshTokens(String header) {
+        // Validate token
+        User user = jwtUtil.validateToken(false, header);
+
+        // Generate Tokens
+        JwtVo jwtVo = jwtUtil.generateTokens(user);
+
+        // Save refresh token to Redis
+        redisUtil.opsForValueSet(user.getUserId() + "_refresh", jwtVo.getRefreshToken(), 24 * 7);
+        
+        return new LoginResDto(user.getUserId(), jwtVo.getAccessToken(), jwtVo.getRefreshToken());
+    }
 }

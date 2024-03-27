@@ -9,10 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
@@ -24,6 +21,13 @@ public class UserController {
     @PostMapping
     public ResponseEntity<ResponseDto> login(@RequestBody @Valid LoginReqDto loginReqDto) {
         LoginResDto loginResDto = userService.login(loginReqDto);
+
+        return ResponseEntity.status(201).body(DataResponseDto.of(loginResDto, 201));
+    }
+
+    @GetMapping("/token")
+    public ResponseEntity<ResponseDto> refreshTokens(@RequestHeader("Authorization-refresh") String header) {
+        LoginResDto loginResDto = userService.refreshTokens(header);
 
         return ResponseEntity.status(201).body(DataResponseDto.of(loginResDto, 201));
     }
