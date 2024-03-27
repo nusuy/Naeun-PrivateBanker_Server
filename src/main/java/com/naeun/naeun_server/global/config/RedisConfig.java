@@ -21,7 +21,7 @@ public class RedisConfig {
     private int port;
     @Value("${SPRING_DATA_REDIS_PASSWORD}")
     private String password;
-    @Value("${spring.profiles.active}")
+    @Value("${spring.profiles.active:}")
     private String activeProfile;
 
     // Connect
@@ -43,7 +43,7 @@ public class RedisConfig {
         RedisTemplate<byte[], byte[]> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        
+
         return redisTemplate;
     }
 }
