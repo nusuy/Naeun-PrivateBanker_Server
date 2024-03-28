@@ -1,11 +1,13 @@
 package com.naeun.naeun_server.domain.Product.controller;
 
+import com.naeun.naeun_server.domain.Product.dto.ProductDetailResDto;
 import com.naeun.naeun_server.domain.Product.dto.ProductSearchResDto;
 import com.naeun.naeun_server.domain.Product.service.ProductService;
 import com.naeun.naeun_server.global.common.DataResponseDto;
 import com.naeun.naeun_server.global.common.ResponseDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,5 +28,12 @@ public class ProductController {
         ProductSearchResDto productSearchResDto = productService.searchProduct(query);
 
         return ResponseEntity.ok(DataResponseDto.of(productSearchResDto, 200));
+    }
+
+    @GetMapping
+    public ResponseEntity<ResponseDto> readProductDetail(@RequestParam(value = "product") @Valid @NotNull(message = "Product id required.") Long productId) {
+        ProductDetailResDto productDetailResDto = productService.readProductDetail(productId);
+
+        return ResponseEntity.ok(DataResponseDto.of(productDetailResDto, 200));
     }
 }
