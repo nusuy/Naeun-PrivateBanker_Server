@@ -81,4 +81,27 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.data.result[0].title").exists())
                 .andDo(print());
     }
+
+    @Test
+    @DisplayName("상품 상세 조회 성공")
+    void readProductDetail() throws Exception {
+        // given
+        Long productId = 7L;
+        String expectedTitle = "트루(ELS) 16952";
+        String expectedUnderlying1 = "EUROSTOXX50";
+
+        // when
+        ResultActions resultActions = mockMvc.perform(get(API_URL)
+                .header("Authorization", "Bearer " + accessToken)
+                .param("product", String.valueOf(productId))
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.productId").value(7))
+                .andExpect(jsonPath("$.data.title").value(expectedTitle))
+                .andExpect(jsonPath("$.data.underlying[0]").value(expectedUnderlying1))
+                .andDo(print());
+    }
 }
