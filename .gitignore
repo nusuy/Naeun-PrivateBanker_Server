@@ -41,3 +41,7 @@ out/
 
 ### Secrets ###
 *.properties
+bucket-key.json
+
+### Test ###
+test.m4a
