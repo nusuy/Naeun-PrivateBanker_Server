@@ -6,6 +6,7 @@ import com.naeun.naeun_server.domain.Record.domain.RecordDetailRepository;
 import com.naeun.naeun_server.domain.Record.domain.RecordRepository;
 import com.naeun.naeun_server.domain.Record.dto.NewRecordReqDto;
 import com.naeun.naeun_server.domain.Record.dto.RecordAnalysisResDto;
+import com.naeun.naeun_server.domain.Record.dto.RecordListItemDto;
 import com.naeun.naeun_server.domain.Record.error.RecordErrorCode;
 import com.naeun.naeun_server.domain.User.domain.User;
 import com.naeun.naeun_server.global.error.GlobalErrorCode;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 
 @Service
 @Slf4j
@@ -80,5 +82,10 @@ public class RecordService {
         record = recordRepository.save(record);
 
         return new RecordAnalysisResDto(record, content, null);
+    }
+
+    @Transactional(readOnly = true)
+    public ArrayList<RecordListItemDto> readRecordList(User user) {
+        return recordRepository.findAllByUserWithJPQL(user);
     }
 }
