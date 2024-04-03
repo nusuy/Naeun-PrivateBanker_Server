@@ -18,3 +18,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: classpath:bucket-key.json
+        project-id: ${GCP_PROJECT_ID}
+        bucket: ${GCP_BUCKET}

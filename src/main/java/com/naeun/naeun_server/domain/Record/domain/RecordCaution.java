@@ -1,5 +1,6 @@
 package com.naeun.naeun_server.domain.Record.domain;
 
+import com.naeun.naeun_server.domain.Record.dto.Gemini.ConvItemDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,13 @@ public class RecordCaution {
     private Long endIndex;
 
     private String cautionReason;
+
+    public RecordCaution(RecordDetail recordDetail, ConvItemDto itemDto) {
+        this.recordDetail = recordDetail;
+        this.startIndex = itemDto.getStart_index();
+        this.endIndex = itemDto.getEnd_index();
+        this.cautionReason = itemDto.getReason();
+    }
 
     @Override
     public boolean equals(Object obj) {
