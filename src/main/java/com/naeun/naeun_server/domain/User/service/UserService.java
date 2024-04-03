@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -29,8 +30,8 @@ public class UserService {
         String deviceId = dto.getId();
 
         // Check DB
-        User user = userRepository.findByUserDeviceId(deviceId)
-                .orElse(userRepository.save(new User(UUID.randomUUID().toString().replace("-", ""), deviceId)));
+        Optional<User> userOpt = userRepository.findByUserDeviceId(deviceId);
+        User user = userOpt.orElseGet(() -> userRepository.save(new User(UUID.randomUUID().toString().replace("-", ""), deviceId)));
 
         // Generate Tokens
         JwtVo jwtVo = jwtUtil.generateTokens(user);
@@ -52,7 +53,7 @@ public class UserService {
 
         // Save refresh token to Redis
         redisUtil.opsForValueSet(user.getUserId() + "_refresh", jwtVo.getRefreshToken(), 24 * 7);
-        
+
         return new LoginResDto(user.getUserId(), jwtVo.getAccessToken(), jwtVo.getRefreshToken());
     }
 }
