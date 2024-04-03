@@ -23,6 +23,11 @@ public class RecordDetail {
     @Column(columnDefinition = "TEXT")
     private String detailContent;
 
+    public RecordDetail(Record record, String detailContent) {
+        this.record = record;
+        this.detailContent = detailContent;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
