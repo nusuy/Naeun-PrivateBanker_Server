@@ -1,9 +1,12 @@
 package com.naeun.naeun_server.domain.Record.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.naeun.naeun_server.domain.Record.domain.Record;
-import com.naeun.naeun_server.domain.Record.domain.RecordDetail;
-import com.naeun.naeun_server.domain.Record.domain.RecordDetailRepository;
-import com.naeun.naeun_server.domain.Record.domain.RecordRepository;
+import com.naeun.naeun_server.domain.Record.domain.*;
+import com.naeun.naeun_server.domain.Record.dto.CautionItemDto;
+import com.naeun.naeun_server.domain.Record.dto.Gemini.ConvAIResDto;
+import com.naeun.naeun_server.domain.Record.dto.Gemini.ConvItemDto;
+import com.naeun.naeun_server.domain.Record.dto.Gemini.ConvReqDto;
 import com.naeun.naeun_server.domain.Record.dto.NewRecordReqDto;
 import com.naeun.naeun_server.domain.Record.dto.RecordAnalysisResDto;
 import com.naeun.naeun_server.domain.Record.dto.RecordListItemDto;
@@ -14,8 +17,13 @@ import com.naeun.naeun_server.global.error.exception.AppException;
 import com.naeun.naeun_server.global.util.GcsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -29,7 +37,11 @@ import java.util.ArrayList;
 public class RecordService {
     private final RecordRepository recordRepository;
     private final RecordDetailRepository recordDetailRepository;
+    private final RecordCautionRepository recordCautionRepository;
     private final GcsUtil gcsUtil;
+
+    @Value("${FAST_API_BASE_URL}")
+    private String FAST_API_BASE_URL;
 
     @Transactional
     public RecordAnalysisResDto addNewRecord(User user, NewRecordReqDto newRecordReqDto) {
@@ -70,22 +82,72 @@ public class RecordService {
                 .considerationExp(exp)
                 .build();
 
+        // Dummy data
         RecordDetail dummy = recordDetailRepository.findById(1L)
                 .orElseThrow(() -> new AppException(GlobalErrorCode.INTERNAL_SERVER_ERROR));
         String content = dummy.getDetailContent();
 
         // Request Gemini API
+        ConvAIResDto resDto;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ConvReqDto convReqDto = new ConvReqDto(content);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> httpEntity = new HttpEntity<>(new ObjectMapper().writeValueAsString(convReqDto), headers);
+
+            resDto = restTemplate.postForObject(
+                    FAST_API_BASE_URL + "/api/v1/conv-analysis",
+                    httpEntity,
+                    ConvAIResDto.class);
+
+            if (resDto == null)
+                throw new AppException(RecordErrorCode.FAST_API_REQ_FAILED);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            e.printStackTrace();
+
+            throw new AppException(RecordErrorCode.FAST_API_REQ_FAILED);
+        }
 
         // Add data to entity
-
-        // Add entity to DB
+        record.updateDataWithGemini(resDto.getResult().size());
         record = recordRepository.save(record);
+        RecordDetail recordDetail = recordDetailRepository.save(new RecordDetail(record, content));
 
-        return new RecordAnalysisResDto(record, content, null);
+        ArrayList<CautionItemDto> cautions = new ArrayList<>();
+
+        for (ConvItemDto dto : resDto.getResult())
+            cautions.add(
+                    new CautionItemDto(
+                            recordCautionRepository.save(
+                                    new RecordCaution(recordDetail, dto))
+                    )
+            );
+
+        return new RecordAnalysisResDto(record, content, cautions);
     }
 
     @Transactional(readOnly = true)
     public ArrayList<RecordListItemDto> readRecordList(User user) {
         return recordRepository.findAllByUserWithJPQL(user);
+    }
+
+    public RecordAnalysisResDto readRecordDetail(User user, Long recordId) {
+        // Check record authority
+        Record record = recordRepository.findById(recordId)
+                .orElseThrow(() -> new AppException(RecordErrorCode.RECORD_NOT_FOUND));
+        if (!record.getUser().equals(user))
+            throw new AppException(RecordErrorCode.RECORD_ACCESS_FORBIDDEN);
+
+        // Find detail (dummy)
+        RecordDetail recordDetail = recordDetailRepository.findById(recordId)
+                .orElseThrow(() -> new AppException(GlobalErrorCode.INTERNAL_SERVER_ERROR));
+
+        // Find cautions
+        ArrayList<CautionItemDto> cautionItemList = recordCautionRepository.findAllByRecordDetailWithJPQL(recordDetail);
+
+        return new RecordAnalysisResDto(record, recordDetail.getDetailContent(), cautionItemList);
     }
 }

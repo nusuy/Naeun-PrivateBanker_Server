@@ -35,4 +35,11 @@ public class RecordController {
 
         return ResponseEntity.ok(DataResponseDto.of(result, 200));
     }
+
+    @GetMapping("/detail")
+    public ResponseEntity<ResponseDto> readRecordDetail(@RequestAttribute("user") User user, @RequestParam("record") Long recordId) {
+        RecordAnalysisResDto recordAnalysisResDto = recordService.readRecordDetail(user, recordId);
+
+        return ResponseEntity.ok(DataResponseDto.of(recordAnalysisResDto, 200));
+    }
 }
