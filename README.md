@@ -5,6 +5,7 @@
 ## About Naeun
 
 ## Tech Architecture
+![Tech Stack](https://github.com/Naeun-privatebanker/Server/assets/68212300/d4f996a9-cabb-43a2-a1a3-c5985ea5b614)
 
 ## How to Run on Local
 
