@@ -4,8 +4,10 @@
 
 ## About Naeun
 
-Naeun is an AI banker service to prevent the elderly from being victimized by mis-selling and help them respond after the fact.<br>
-To prevent financial damage to the elderly due to mis-selling, the service strengthens the crisis management capabilities of elderly consumers through financial technology specialized for the elderly.
+Naeun is an AI banker service to prevent the elderly from being victimized by mis-selling and help them respond after
+the fact.<br>
+To prevent financial damage to the elderly due to mis-selling, the service strengthens the crisis management
+capabilities of elderly consumers through financial technology specialized for the elderly.
 <br><br>
 나은(Naeun)은 불완전판매로 인한 고령층의 피해를 사전 방지하고 사후 대응을 돕기 위한 AI 은행원 서비스입니다. <br>
 불완전판매로 인한 고령층의 금융피해를 방지하기 위해 노인 전용 금융 기술을 통해 고령소비자의 위기관리 능력을 강화합니다.
@@ -13,6 +15,11 @@ To prevent financial damage to the elderly due to mis-selling, the service stren
 ## Tech Architecture
 
 ![Tech Stack](https://github.com/Naeun-privatebanker/Server/assets/68212300/d4f996a9-cabb-43a2-a1a3-c5985ea5b614)
+
+## Fast API Repository Link
+
+Gemini 프롬프트 답변을 전달하기 위한 Fast API 소스코드 Repo 입니다. <br>
+[Repository Link](https://github.com/nusuy/Naeun-PrivateBanker_FastAPI)
 
 ## How to Run on Local
 
