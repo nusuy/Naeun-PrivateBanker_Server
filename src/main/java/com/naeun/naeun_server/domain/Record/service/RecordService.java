@@ -15,6 +15,7 @@ import com.naeun.naeun_server.domain.User.domain.User;
 import com.naeun.naeun_server.global.error.GlobalErrorCode;
 import com.naeun.naeun_server.global.error.exception.AppException;
 import com.naeun.naeun_server.global.util.GcsUtil;
+import com.naeun.naeun_server.global.util.SttUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +40,7 @@ public class RecordService {
     private final RecordDetailRepository recordDetailRepository;
     private final RecordCautionRepository recordCautionRepository;
     private final GcsUtil gcsUtil;
+    private final SttUtil sttUtil;
 
     @Value("${FAST_API_BASE_URL}")
     private String FAST_API_BASE_URL;
@@ -81,6 +83,14 @@ public class RecordService {
                 .recordFilePath(path)
                 .considerationExp(exp)
                 .build();
+
+        // Speech-to-Text
+        String stt = null;
+        try {
+            sttUtil.transcribe(newRecordReqDto.getFile());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
 
         // Dummy data
         RecordDetail dummy = recordDetailRepository.findById(1L)
